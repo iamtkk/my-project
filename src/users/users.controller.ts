@@ -1,75 +1,42 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpCode,
-  Header,
-  BadRequestException,
-  Redirect,
-  Query,
-} from '@nestjs/common';
-import { UsersService } from './users.service';
+import { Controller, Body, Post, Query, Param, Get } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UserLoginDto } from './dto/user-login.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { UserInfo } from './UserInfo';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
-
+  //테스트는 아래와 같이 해야한다. windows curl에서의 -d의 body 구문은 작은 따옴표로 감싸면 오류가 발생한다.
+  //curl -X POST http://localhost:3000/users -H "Content-Type:application/json" -d "{\"name\":\"YOUR_NAME\",\"email\":\"YOUR_EMAIL@gmail.com\"}"
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    // return this.usersService.create(createUserDto);
-    const { name, email } = createUserDto;
-    return `유저를 생성했습니다. 이름: ${name}, 이메일: ${email}`;
+  async createUser(@Body() dto: CreateUserDto): Promise<void> {
+    console.log('dto : ', dto);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @Post('/email-verify')
+  async verifyEmail(@Query() dto: VerifyEmailDto): Promise<string> {
+    console.log(dto);
+    return;
   }
 
-  // @Header('Custom', 'Test Header')
-  // @Redirect('https://nestjs.com', 301)
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    if (+id < 1) {
-      throw new BadRequestException('id는 0보다 큰 값이어야 합니다.');
-    }
-    return this.usersService.findOne(+id);
+  @Post('/login')
+  async login(@Body() dto: UserLoginDto): Promise<string> {
+    console.log(dto);
+    return;
   }
 
-  @HttpCode(202)
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
-
-  // @Delete(':userId/memo/:memoId')
-  // deleteUserMemo(@Param() params: { [key: string]: string }) {
-  //   return `userId: ${params.userId}, memoId: ${params.memoId}`;
-  // }
-  @Delete(':userId/memo/:memoId')
-  deleteUserMemo(
-    @Param('userId') userId: string,
-    @Param('memoId') memoId: string,
-  ) {
-    return `userId : ${userId}, memoId: ${memoId}`;
-  }
-
-  @Get('redirect/docs')
-  @Redirect('https://docs.nestjs.com', 302)
-  getDocs(@Query('version') version) {
-    if (version && version === '5') {
-      return { url: 'https://docs.nestjs.com/v5/' };
-    }
+  @Get('/:id')
+  async getUserInfo(@Param('id') userId: string): Promise<string> {
+    console.log(userId);
+    return;
   }
 }
+
+// 이메일 인증
+// curl -X POST http://localhost:3000/users/email-verify\?signupVerifyToken\=test_token
+
+// 로그인
+// curl -X POST http://localhost:3000/users/login -H "Content-Type:application/json" -d "{\"email\":\"YOUR_EMAIL@gmail.com\",\"password\":\"PASSWORD\"}"
+
+// 회원 정보 조회
+// curl -X GET http://localhost:3000/users/user-id
