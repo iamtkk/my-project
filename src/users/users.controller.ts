@@ -7,6 +7,10 @@ import {
   Param,
   Delete,
   HttpCode,
+  Header,
+  BadRequestException,
+  Redirect,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,7 +22,9 @@ export class UsersController {
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+    // return this.usersService.create(createUserDto);
+    const { name, email } = createUserDto;
+    return `유저를 생성했습니다. 이름: ${name}, 이메일: ${email}`;
   }
 
   @Get()
@@ -26,8 +32,13 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  // @Header('Custom', 'Test Header')
+  // @Redirect('https://nestjs.com', 301)
   @Get(':id')
   findOne(@Param('id') id: string) {
+    if (+id < 1) {
+      throw new BadRequestException('id는 0보다 큰 값이어야 합니다.');
+    }
     return this.usersService.findOne(+id);
   }
 
@@ -40,5 +51,25 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
+  }
+
+  // @Delete(':userId/memo/:memoId')
+  // deleteUserMemo(@Param() params: { [key: string]: string }) {
+  //   return `userId: ${params.userId}, memoId: ${params.memoId}`;
+  // }
+  @Delete(':userId/memo/:memoId')
+  deleteUserMemo(
+    @Param('userId') userId: string,
+    @Param('memoId') memoId: string,
+  ) {
+    return `userId : ${userId}, memoId: ${memoId}`;
+  }
+
+  @Get('redirect/docs')
+  @Redirect('https://docs.nestjs.com', 302)
+  getDocs(@Query('version') version) {
+    if (version && version === '5') {
+      return { url: 'https://docs.nestjs.com/v5/' };
+    }
   }
 }
