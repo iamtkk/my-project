@@ -3,32 +3,39 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { UserInfo } from './UserInfo';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
+  constructor(private usersService: UsersService) {}
   //테스트는 아래와 같이 해야한다. windows curl에서의 -d의 body 구문은 작은 따옴표로 감싸면 오류가 발생한다.
   //curl -X POST http://localhost:3000/users -H "Content-Type:application/json" -d "{\"name\":\"YOUR_NAME\",\"email\":\"YOUR_EMAIL@gmail.com\"}"
   @Post()
   async createUser(@Body() dto: CreateUserDto): Promise<void> {
-    console.log('dto : ', dto);
+    const { name, email, password } = dto;
+    await this.usersService.createUser(name, email, password);
   }
 
   @Post('/email-verify')
   async verifyEmail(@Query() dto: VerifyEmailDto): Promise<string> {
-    console.log(dto);
-    return;
+    const { signupVerifyToken } = dto;
+    return await this.usersService.verifyEmail(signupVerifyToken);
   }
 
   @Post('/login')
   async login(@Body() dto: UserLoginDto): Promise<string> {
-    console.log(dto);
-    return;
+    const { email, password } = dto;
+    return await this.usersService.login(email, password);
   }
 
   @Get('/:id')
-  async getUserInfo(@Param('id') userId: string): Promise<string> {
-    console.log(userId);
-    return;
+  async getUserInfo(@Param('id') userId: string): Promise<UserInfo> {
+    return await this.usersService.getUserInfo(userId);
+  }
+
+  @Get()
+  getHello(): string {
+    return 'hello world';
   }
 }
 
